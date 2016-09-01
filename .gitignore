@@ -1,7 +1,11 @@
-pom.xml
-*.jar
-/lib/
-/classes/
-/target/
+*.deb
 .lein-failures
 .lein-deps-sum
+.vagrant/
+debian/*.debhelper
+debian/debhelper-build-stamp
+debian/files
+debian/cms-notify.debhelper.log
+debian/cms-notify.substvars
+debian/cms-notify/
+target/

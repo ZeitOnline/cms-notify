@@ -1,0 +1,11 @@
+Source: cms-notify
+Section: utils
+Priority: optional
+Maintainer: Wolfgang Schnerring <zon-backend@zeit.de>
+Build-Depends: debhelper (>=9), default-jdk
+Standards-Version: 3.9.6
+
+Package: cms-notify
+Architecture: any
+Depends: default-jre-headless, lsb-base (>= 3.0-6), ${shlibs:Depends}, ${misc:Depends}
+Description: Sends notifications to jabber for changes to the CMS/DAV db.

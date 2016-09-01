@@ -1,0 +1,2 @@
+target/cms-notify.jar /usr/share/cms-notify
+./example.conf /usr/share/doc/cms-notify/

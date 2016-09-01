@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: cms-notify
+Source: <http://seid-online.de>
+
+Files: *
+Copyright: 2009 R. Mattes <rm@seid-online.de>
+           <years> <likewise for another author>
+License: proprietary

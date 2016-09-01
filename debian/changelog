@@ -1,0 +1,5 @@
+cms-notify (1.0.0-zeit1) unstable; urgency=medium
+
+  * Initial packaging
+
+ -- Wolfgang Schnerring <zon-backend@zeit.de>  Thu, 01 Sep 2016 15:29:09 +0200
