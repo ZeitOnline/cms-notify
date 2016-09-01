@@ -1,13 +1,11 @@
 # de.tuxteam.cms.notify
 
-FIXME: write description
+Sends notifications to a Jabber MUC for changes to the CMS/DAV database.
 
 ## Usage
 
 FIXME: write
 
-## License
+## Building
 
-Copyright (C) 2011 FIXME
-
-Distributed under the Eclipse Public License, the same as Clojure.
+* Install leiningen from http://leiningen.org/

@@ -2,24 +2,23 @@
 
 (ns de.tuxteam.cms.notify.core
 	(:gen-class)
-;;	(use clojure.contrib.repl-ln)
         (:use clojure.contrib.sql)
         (import (java.util Date))
         (import (java.sql Timestamp))
         (import (java.text DateFormat))
-        (import (org.jivesoftware.smack ConnectionConfiguration 
+        (import (org.jivesoftware.smack ConnectionConfiguration
                                         SASLAuthentication
-                                        XMPPConnection 
+                                        XMPPConnection
                                         XMPPException))
         (import (org.jivesoftware.smack.packet Message Message$Type))
         (import (org.jivesoftware.smackx.muc MultiUserChat))
         (import (org.jivesoftware.smackx XHTMLManager XHTMLText)))
 
-;;;;############################################################################################
-;;;;                                                                     Customization
-;;;;############################################################################################
+;;;;############################################################################
+;;;;                                                     Customization
+;;;;############################################################################
 
-;;;;###################################################################[ Jabber Server ]########
+;;;;###################################################[ Jabber Server ]########
 
 (def jabber-host     "zip6.zeit.de")
 (def jabber-user     "cms-backend")
@@ -28,18 +27,18 @@
 (def muc-password    "")
 (def cms-room        "notifications")
 
-;;;;###############################################################[ Database Settings ]########
+;;;;###############################################[ Database Settings ]########
 
 (def database {:classname   "org.postgresql.Driver" ; must be in classpath
                :subprotocol "postgresql"
-               :subname      (str "//" "localhost" ":" 5432 "/" "cms") ;"//localhost:5432/cms"
+               :subname     "//localhost:5432/cms"
                :user        "cms-reader"
                :password    ""})
 
 
-;;;;############################################################################################
-;;;;                                                                           Globals
-;;;;############################################################################################
+;;;;############################################################################
+;;;;                                                           Globals
+;;;;############################################################################
 
 ;;; A list of resource events that we want to report
 (def interesting-events (hash-set "PROPPATCH" "MKCOL" "PUT" "DELETE" "MOVE"))
@@ -53,9 +52,9 @@
 ;;; How long should we sleep inbetween polls? (in ms.)
 (def *sleep-time* 20000)
 
-;;;;############################################################################################
-;;;;                                                                      Mutable Data
-;;;;############################################################################################
+;;;;############################################################################
+;;;;                                                      Mutable Data
+;;;;############################################################################
 
 ;;; `last-event' holds the timestamp of the last time we looked at the
 ;;; event table. We initialize it to the current time at
@@ -70,11 +69,11 @@
 (def server-state (ref :running))
 
 
-;;;;############################################################################################
-;;;;                                                                      Code Section
-;;;;############################################################################################
+;;;;############################################################################
+;;;;                                                      Code Section
+;;;;############################################################################
 
-(defn patch-jabber-library 
+(defn patch-jabber-library
   "Dissable over-correct SAL methods for now"
   []
   (doseq [method ["EXTERNAL" "GSSAPI" "DIGEST-MD5" "CRAM-MD5"]]
@@ -84,8 +83,8 @@
 (defn init-jabber-connection []
   "Initialize the connection to the jabber server"
   (let [conn (new XMPPConnection jabber-host)]
-    
-    (doto conn  
+
+    (doto conn
       (.connect)
       (.login jabber-user jabber-password))
     (def *jabber-connection* conn)))
@@ -109,17 +108,17 @@
       (.setBody (str "Hello from CMS-Backend")))
       (.sendMessage *conference* message)))
 
-(defn process-interesting-events 
+(defn process-interesting-events
   [event]
   (when (contains?  interesting-events (:method event))
     (send-notification (:source event))))
 
-(defn check-resources 
+(defn check-resources
   ""
   []
   (println "Checking for changed resource")
   (transaction
-   (with-query-results rs 
+   (with-query-results rs
      ["SELECT distinct(source), method, now() AS now FROM triggers WHERE logdate >= ?::timestamp"  @last-event]
      (when (first rs)
        (dosync (ref-set last-event (str (:now (first rs))))))
@@ -127,24 +126,20 @@
 
 
 
-(defn run-event-loop 
+(defn run-event-loop
   ""
   []
   (with-connection database
     (println "Connected to database")
     (while (= @server-state :running)
-      (check-resources) 
+      (check-resources)
       (Thread/sleep *sleep-time*))))	
 
 
-;;;;############################################################################[ Main ]########
+;;;;############################################################[ Main ]########
 
 (defn -main [& arguments]
   (patch-jabber-library)
-  ;; connect to the jabber server
   (init-jabber-connection)
   (join-conference)
   (run-event-loop))
-
-                    
- 
