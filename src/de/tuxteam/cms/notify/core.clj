@@ -3,6 +3,7 @@
 (ns de.tuxteam.cms.notify.core
 	(:gen-class)
         (:use clojure.contrib.sql)
+        (:use clojure-ini.core)
         (import (java.util Date))
         (import (java.sql Timestamp))
         (import (java.text DateFormat))
@@ -13,28 +14,6 @@
         (import (org.jivesoftware.smack.packet Message Message$Type))
         (import (org.jivesoftware.smackx.muc MultiUserChat))
         (import (org.jivesoftware.smackx XHTMLManager XHTMLText)))
-
-;;;;############################################################################
-;;;;                                                     Customization
-;;;;############################################################################
-
-;;;;###################################################[ Jabber Server ]########
-
-(def jabber-host     "zip6.zeit.de")
-(def jabber-user     "cms-backend")
-(def jabber-password "--arag0rn+")
-(def conference-room "notifications@conference.zip6.zeit.de")
-(def muc-password    "")
-(def cms-room        "notifications")
-
-;;;;###############################################[ Database Settings ]########
-
-(def database {:classname   "org.postgresql.Driver" ; must be in classpath
-               :subprotocol "postgresql"
-               :subname     "//localhost:5432/cms"
-               :user        "cms-reader"
-               :password    ""})
-
 
 ;;;;############################################################################
 ;;;;                                                           Globals
@@ -80,18 +59,18 @@
     (SASLAuthentication/unregisterSASLMechanism method))
   (SASLAuthentication/supportSASLMechanism "PLAIN" 0))
 
-(defn init-jabber-connection []
+(defn init-jabber-connection [config]
   "Initialize the connection to the jabber server"
-  (let [conn (new XMPPConnection jabber-host)]
+  (let [conn (new XMPPConnection (:host config))]
 
     (doto conn
       (.connect)
-      (.login jabber-user jabber-password))
+      (.login (:user config) (:password config)))
     (def *jabber-connection* conn)))
 
-(defn join-conference []
-  (let [muc (MultiUserChat. *jabber-connection* conference-room)]
-    (.join muc jabber-user muc-password)
+(defn join-conference [config]
+  (let [muc (MultiUserChat. *jabber-connection* (:muc config))]
+    (.join muc (:user config) (:muc-password config))
     (def *conference* muc)))
 
 (defn send-notification [text]
@@ -128,7 +107,12 @@
 
 (defn run-event-loop
   ""
-  []
+  [config]
+  (def database {:classname   "org.postgresql.Driver" ; must be in classpath
+                 :subprotocol "postgresql"
+                 :subname     (:url config)
+                 :user        (:user config)
+                 :password    (:password config)})
   (with-connection database
     (println "Connected to database")
     (while (= @server-state :running)
@@ -138,8 +122,9 @@
 
 ;;;;############################################################[ Main ]########
 
-(defn -main [& arguments]
+(defn -main [configfile]
+  (def config (read-ini configfile :keywordize? true :comment-char \#))
   (patch-jabber-library)
-  (init-jabber-connection)
-  (join-conference)
-  (run-event-loop))
+  (init-jabber-connection (:jabber config))
+  (join-conference (:jabber config))
+  (run-event-loop (:postgres config)))
