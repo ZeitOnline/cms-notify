@@ -101,7 +101,7 @@
      ["SELECT distinct(source), method, now() AS now FROM triggers WHERE logdate >= ?::timestamp"  @last-event]
      (when (first rs)
        (dosync (ref-set last-event (str (:now (first rs))))))
-     (dorun (map #(process-interesting-events %) (into (hash-set) (map  rs)))))))
+     (dorun (map #(process-interesting-events %) (into (hash-set)  rs))))))
 
 
 
