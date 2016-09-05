@@ -21,3 +21,6 @@
 override_dh_auto_build:
 	LEIN_ROOT=1 ./lein uberjar
 	mv target/de.tuxteam.cms.notify-1.0.0-standalone.jar target/cms-notify.jar
+
+override_dh_builddeb:
+	dh_builddeb -- -Zgzip
