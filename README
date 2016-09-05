@@ -1,11 +1,44 @@
 # de.tuxteam.cms.notify
 
-Sends notifications to a Jabber MUC for changes to the CMS/DAV database.
+Schickt bei Änderungen an der DAV-Datenbank eine Nachricht in einen Jabber Multi-User-Chat.
+
 
 ## Usage
 
-FIXME: write
+`java -jar cms-notify.jar config.ini`
+
+Beispielkonfiguration:
+
+```
+    [jabber]
+    host = cms-backend.staging.zeit.de
+    user = cms-backend
+    password = secret
+    muc = notifications@conference.cms-backend.staging.zeit.de
+    muc-password =
+
+    [postgres]
+    url = //localhost:5432/cms
+    user = cms-reader
+    password =
+```
+
+Nach Installation als deb gibt es ein `/etc/init.d/cms-notify`, das die
+Konfiguration in `/etc/cms-notify.conf` erwartet.
+
+XXX Loggen tut es leider bisher nichts, bei Problemen also am besten mal im
+Vordergrund starten.
+
 
 ## Building
 
-* Install leiningen from http://leiningen.org/
+deb-Paket erstellen in Vagrant-VM mit `./build-scripts/make-deb.sh`
+
+Lokal bauen mit `lein uberjar` (dazu http://leiningen.org/ installieren)
+
+
+## Funktionsweise
+
+Das Apache-Modul mod_dav_cms schreibt bei jeder Änderung, die es durchführt,
+zusätzlich eine Zeile in die Tabelle `triggers`. Die lesen wir hier einfach
+periodisch aus und übersetzen ihre Zeilen in Jabber-Nachrichten.
