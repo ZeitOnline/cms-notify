@@ -1,3 +1,9 @@
+cms-notify (1.1.0-zeit1) unstable; urgency=medium
+
+  * Transmit timestamp so it works with timezone information
+
+ -- Wolfgang Schnerring <wolfgang.schnerring@zeit.de>  Thu, 27 Apr 2017 13:07:53 +0200
+
 cms-notify (1.0.0-zeit2) unstable; urgency=medium
 
   * Compress deb with gzip so it works with Ubuntu-10

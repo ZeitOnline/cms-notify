@@ -42,7 +42,7 @@
 ;;; without this by passing the last seen time to the next poll
 ;;; call. Maybe next time ;-/
 
-(def last-event (ref (str (Timestamp. (.getTime (Date.))))))
+(def last-event (ref (Timestamp. (.getTime (Date.)))))
 
 ;;; Should we run/sleep/stop?
 (def server-state (ref :running))
@@ -98,9 +98,9 @@
   (println "Checking for changed resource since" @last-event)
   (transaction
    (with-query-results rs
-     ["SELECT distinct(source), method, now() AS now FROM triggers WHERE logdate >= ?::timestamp"  @last-event]
+     ["SELECT distinct(source), method, now() AS now FROM triggers WHERE logdate >= ?"  @last-event]
      (when (first rs)
-       (dosync (ref-set last-event (str (:now (first rs))))))
+       (dosync (ref-set last-event (:now (first rs)))))
      (if (first rs)
        (println "Have results") (println "No results"))
      (dorun (map #(process-interesting-events %) (into (hash-set)  rs))))))
