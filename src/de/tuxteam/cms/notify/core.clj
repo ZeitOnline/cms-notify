@@ -95,12 +95,14 @@
 (defn check-resources
   ""
   []
-  (println "Checking for changed resource")
+  (println "Checking for changed resource since" @last-event)
   (transaction
    (with-query-results rs
      ["SELECT distinct(source), method, now() AS now FROM triggers WHERE logdate >= ?::timestamp"  @last-event]
      (when (first rs)
        (dosync (ref-set last-event (str (:now (first rs))))))
+     (if (first rs)
+       (println "Have results") (println "No results"))
      (dorun (map #(process-interesting-events %) (into (hash-set)  rs))))))
 
 
